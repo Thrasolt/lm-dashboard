@@ -1,0 +1,8 @@
+.filterContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.filterButton {
+    margin: 0.5em;
+}

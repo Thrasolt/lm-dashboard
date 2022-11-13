@@ -1,0 +1,19 @@
+.column {
+    float: left;
+    width: 48%;
+    margin: 1%;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+h1 {
+    text-align:center;
+}
+
+h3 {
+    text-align:center;
+}
