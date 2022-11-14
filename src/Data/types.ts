@@ -56,6 +56,10 @@ export type RelationSentenceTypeRow = {
     compound: number;
     complex: number;
     "compound-complex": number;
+    active: string;
+    passive: string;
+    nominalized: string;
+
 }
 
 export type SentenceValues = {

@@ -1,18 +1,31 @@
-import React, {useState} from "react";
-import {DataSourceType, MetricType, Model} from "../../Data/types";
+import React, {useEffect, useState} from "react";
+import {
+    AggregateRow,
+    DataSourceType,
+    MetricType,
+    Model,
+    ModelSentenceTypeRow,
+    RelationSentenceTypeRow
+} from "../../Data/types";
 import DataTable from "react-data-table-component";
-import {getRelationComparisonData} from "../../Data/handleAggregateData";
+import {getModelComparisonData, getRelationComparisonData} from "../../Data/handleAggregateData";
 import {RelationComparisonColumns} from "./RelationComparisonColumns";
 import {FilterSelection} from "../Components/FilterSelection";
 import {DATA_SOURCE_CHOICES, METRIC_CHOICES, MODELS} from "../../Data/Constants";
 import {SelectChangeEvent} from "@mui/material";
+import {getAggregateData} from "../../Data/server/retriveAggregateData";
 
 
-export const RelationComparison: React.FC = () => {
+type Props = {
+    keys: string[]
+}
+export const RelationComparison: React.FC<Props> = ({keys}: Props) => {
 
     const [model, setModel] = useState<Model>("bert-base-cased");
     const [dataSource, setDataSource] = useState<DataSourceType>("complete");
     const [metric, setMetric] = useState<MetricType>("k@1 accuracy");
+
+    const [data, setData] = useState<RelationSentenceTypeRow[]>([])
 
 
     const handleDataSourceChange = (event: SelectChangeEvent) => {
@@ -26,6 +39,16 @@ export const RelationComparison: React.FC = () => {
     const handleModelChane = (event: SelectChangeEvent) => {
         setModel(event.target.value as Model)
     };
+
+    useEffect(() => {
+        getAggregateData()
+            .then(data => data["data"])
+            .then((data) => {
+                const newData = getRelationComparisonData(model, dataSource, metric, keys, data as AggregateRow[])
+                setData(newData);
+            });
+
+    }, [model, dataSource, metric, keys])
 
     return (<>
         <h2>Relation Comparison</h2>
@@ -53,8 +76,9 @@ export const RelationComparison: React.FC = () => {
             />
         </div>
         <DataTable
-            columns={RelationComparisonColumns}
-            data={getRelationComparisonData(model, dataSource, metric)}
+            columns={RelationComparisonColumns.filter(
+                element => keys.includes(element.name as string) || element.name === "relation")}
+            data={data}
         />
 
     </>)

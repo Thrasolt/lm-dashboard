@@ -72,13 +72,16 @@ export const getMetricComparisonData = (
 export const getRelationComparisonData = (
     model: Model,
     dataSource: DataSourceType,
-    metric: MetricType) => {
+    metric: MetricType,
+    keys: string[],
+    data: AggregateRow[]) => {
+
+    const filterFunction = (row: AggregateDataRow) =>
+        row.model === model && row.data === dataSource && row.filterName !== null && row.filterName.startsWith("P")
+        && row.measure === metric && keys.includes(row.sentence);
 
     const relevantData: AggregateRow[] =  filterData(
-        AggregateData,
-        row => row.model === model && row.data === dataSource
-            && row.filterName !== null &&
-            row.filterName.startsWith("P") && row.measure === metric);
+        data, filterFunction);
 
     const resultMap = new Map<String, RelationSentenceTypeRow>();
 

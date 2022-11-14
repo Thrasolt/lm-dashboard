@@ -45,7 +45,7 @@ export const Container = () => {
                 </div>
                 <div className="row">
                     <div className="column">
-                        <RelationComparison/>
+                        <RelationComparison keys={keys}/>
                     </div>
                     <div className="column">
                         <ScoreComparison/>
