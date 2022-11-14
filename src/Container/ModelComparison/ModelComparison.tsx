@@ -73,7 +73,8 @@ export const ModelComparison: React.FC<Props> = ({keys}: Props) => {
                 />
             </div>
             <DataTable
-                columns={ModelComparisonColumns.filter(element => keys.includes(element.name as string))}
+                columns={ModelComparisonColumns.filter(
+                    element => keys.includes(element.name as string) || element.name === "Model")}
                 data={data}
             />
         </>

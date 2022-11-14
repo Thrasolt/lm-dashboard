@@ -1,17 +1,31 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {FilterSelection} from "../Components/FilterSelection";
-import {boradFilterNameType, DataSourceType, Model} from "../../Data/types";
+import {
+    AggregateRow,
+    boradFilterNameType,
+    DataSourceType,
+    MetricSentenceTypeRow,
+    Model,
+    ModelSentenceTypeRow
+} from "../../Data/types";
 import {DATA_SOURCE_CHOICES, MODELS, NO_FILTER_NAME} from "../../Data/Constants";
 import {SelectChangeEvent} from "@mui/material";
 import DataTable from "react-data-table-component";
-import {getMetricComparisonData} from "../../Data/handleAggregateData";
+import {getMetricComparisonData, getModelComparisonData} from "../../Data/handleAggregateData";
 import {MetricComparisonColumns} from "./MetricComparisonColumns";
+import {getAggregateData} from "../../Data/server/retriveAggregateData";
 
-export const MetricComparison: React.FC = () => {
+type Props = {
+    keys: string[]
+}
+
+export const MetricComparison: React.FC<Props> = ({keys}: Props) => {
 
     const [model, setModel] = useState<Model>("bert-base-cased");
     const [dataSource, setDataSource] = useState<DataSourceType>("complete");
     const [filterName, setFilterName] = useState<boradFilterNameType>(null);
+
+    const [data, setData] = useState<MetricSentenceTypeRow[]>([])
 
     const handleFilterNameChange = (event: SelectChangeEvent) => {
         const newFilterName = (event.target.value === NO_FILTER_NAME ? null : event.target.value) as boradFilterNameType
@@ -25,6 +39,16 @@ export const MetricComparison: React.FC = () => {
     const handleDataSourceChange = (event: SelectChangeEvent) => {
         setDataSource(event.target.value as DataSourceType);
     };
+
+    useEffect(() => {
+        getAggregateData()
+            .then(data => data["data"])
+            .then((data) => {
+                const newData = getMetricComparisonData(filterName, model, dataSource, keys, data as AggregateRow[])
+                setData(newData);
+            });
+
+    }, [filterName, dataSource, model, keys])
 
     return (<>
         <h2>Metric Comparison</h2>
@@ -52,8 +76,9 @@ export const MetricComparison: React.FC = () => {
             />
         </div>
         <DataTable
-            columns={MetricComparisonColumns}
-            data={getMetricComparisonData(filterName, model, dataSource)}
+            columns={MetricComparisonColumns.filter(
+                element => keys.includes(element.name as string) || element.name === "metric")}
+            data={data}
         />
     </>)
 }

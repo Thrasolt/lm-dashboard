@@ -40,7 +40,7 @@ export const Container = () => {
                         <ModelComparison keys={keys}/>
                     </div>
                     <div className="column">
-                        <MetricComparison/>
+                        <MetricComparison keys={keys}/>
                     </div>
                 </div>
                 <div className="row">

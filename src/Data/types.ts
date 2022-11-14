@@ -34,9 +34,9 @@ export type ModelSentenceTypeRow = {
     compound: number;
     complex: number;
     "compound-complex": number;
-    active: string,
-    passive: string,
-    nominalized: string,
+    active: string;
+    passive: string;
+    nominalized: string;
 }
 
 export type MetricSentenceTypeRow = {
@@ -45,10 +45,13 @@ export type MetricSentenceTypeRow = {
     compound: number;
     complex: number;
     "compound-complex": number;
+    active: string;
+    passive: string;
+    nominalized: string;
 }
 
 export type RelationSentenceTypeRow = {
-    relation: string,
+    relation: string;
     simple: number;
     compound: number;
     complex: number;

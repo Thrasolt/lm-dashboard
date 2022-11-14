@@ -48,12 +48,15 @@ export const getModelComparisonData = (
 export const getMetricComparisonData = (
     filterName: string | null,
     model: Model,
-    dataSource: DataSourceType ) => {
+    dataSource: DataSourceType,
+    keys: string[],
+    data: AggregateRow[]) => {
 
-    const relevantData: AggregateRow[] =  filterData(
-        AggregateData,
-        row => row.model === model && row.data === dataSource && row.filterName === filterName);
+    const filterFunction = (row: AggregateDataRow) => {
+        return row.model === model && row.data === dataSource
+            && row.filterName === filterName && keys.includes(row.sentence)}
 
+    const relevantData: AggregateRow[] =  filterData(data,filterFunction);
     const resultMap = new Map<MetricType, MetricSentenceTypeRow>();
 
     for(let row of relevantData){

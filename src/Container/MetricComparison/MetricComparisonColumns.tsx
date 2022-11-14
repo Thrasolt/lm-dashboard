@@ -27,4 +27,21 @@ export const MetricComparisonColumns: TableColumn<MetricSentenceTypeRow>[] = [
         selector: row => row["compound-complex"],
         sortable: true,
     },
+    {
+        name: 'active',
+        selector: row => row["active"],
+        sortable: true,
+    },
+
+    {
+        name: 'passive',
+        selector: row => row["passive"],
+        sortable: true,
+    },
+
+    {
+        name: 'nominalized',
+        selector: row => row["nominalized"],
+        sortable: true,
+    },
 ];
