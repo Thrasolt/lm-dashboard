@@ -6,12 +6,17 @@ import {FilterSelection} from "../Components/FilterSelection";
 import {getEmptySentenceScores, getProbabilities} from "../../Data/handleData";
 import {getScoreRows} from "../../Data/server/retrieveScores";
 import {ScorePlot} from "./ScorePlot";
-import {SentenceTypeHeatMap} from "../Components/SentenceTypeHeatMap";
-import {calculateProbabilitiesHeatMap} from "../../Data/server/kl_divergence";
+import {KeySetting} from "../Container";
+import {KLDivergenceHeatmap} from "./KLDivergenceHeatmap";
 
 const NUMBER_OF_POINTS = 1000;
 
-export const ScoreComparison: React.FC = () => {
+type Props = {
+    keys: string[]
+    keySetting: KeySetting;
+}
+
+export const ScoreComparison: React.FC<Props> = ({keys, keySetting}: Props) => {
 
     const [model, setModel] = useState<Model>("bert-base-cased");
     const [filterName, setFilterName] = useState<boradFilterNameType>(null);
@@ -26,9 +31,10 @@ export const ScoreComparison: React.FC = () => {
     }
 
     const handleProbabilities = () => {
-            const result = getProbabilities(scoreRows, filterName as string, numberOfPockets, NUMBER_OF_POINTS, );
+            const result = getProbabilities(scoreRows, filterName as string, numberOfPockets, NUMBER_OF_POINTS, keySetting);
             setScores(result.scores);
             setProbabilities(result.probabilities);
+
     }
 
     const handleModelChange = async (event: SelectChangeEvent) => {
@@ -86,8 +92,16 @@ export const ScoreComparison: React.FC = () => {
                 />
             </div>
             <div>
-                <ScorePlot scores={scores} probabilities={probabilities}/>
-                <SentenceTypeHeatMap valueMatrix={calculateProbabilitiesHeatMap(probabilities)}/>
+                <ScorePlot
+                    scores={scores}
+                    probabilities={probabilities}
+                    keys={keys}
+                    keySetting={keySetting}
+                />
+                <KLDivergenceHeatmap
+                    probabilities={probabilities}
+                    keys={keys}
+                />
             </div>
         </>
     );

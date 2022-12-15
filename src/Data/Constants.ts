@@ -15,3 +15,5 @@ export const KEYS = {
     verbs: ["active", "passive", "nominalized"],
     complete: ["simple", "compound", "complex", "compound-complex", "active", "passive", "nominalized"]
 }
+
+export const NOMINALIZED_RELATIONS = ["P127", "P136", "P176", "P178", "P413", "P1303"];

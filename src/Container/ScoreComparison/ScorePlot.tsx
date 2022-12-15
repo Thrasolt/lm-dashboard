@@ -1,12 +1,26 @@
 import React, {useState} from "react";
 import Plot from "react-plotly.js";
-import {SentenceValues} from "../../Data/types";
+import {ComnpleteValues, SentenceValues, VerbValues} from "../../Data/types";
 import {SelectChangeEvent} from "@mui/material";
 import {FilterSelection} from "../Components/FilterSelection";
+import {KeySetting} from "../Container";
 
 type Props = {
     scores: number[],
     probabilities: SentenceValues
+    keys: string[];
+    keySetting: KeySetting;
+}
+
+const heatMapEntry = (key: string, scores: number[], probabilities: SentenceValues) => {
+    return {
+        x: scores,
+        // @ts-ignore
+        y: probabilities[key],
+        type: 'scatter',
+        mode: 'lines',
+        name: key
+    }
 }
 
 
@@ -43,8 +57,26 @@ export const ScorePlot: React.FC<Props> = (props: Props) => {
 
             </div>
             <Plot
-                data={
-                [
+                // @ts-ignore
+                data={ props.keys.map(key => heatMapEntry(key,props.scores, props.probabilities))
+
+                }
+                layout={{
+                    title: 'Correct Token Score Probabilities',
+                    width: 800,
+                    height: 500,
+                    xaxis: {
+                        range: [0, xLimit]
+                    },
+                    yaxis: {
+                        range: [0, yLimit]
+                    }}}
+            />
+        </>)
+};
+
+/*
+*                 [
                     {
                         x: props.scores,
                         y: props.probabilities.simple,
@@ -74,17 +106,4 @@ export const ScorePlot: React.FC<Props> = (props: Props) => {
                         name: "compound-complex"
                     },
                 ]
-                }
-                layout={{
-                    title: 'Correct Token Score Probabilities',
-                    width: 800,
-                    height: 500,
-                    xaxis: {
-                        range: [0, xLimit]
-                    },
-                    yaxis: {
-                        range: [0, yLimit]
-                    }}}
-            />
-        </>)
-};
+* */

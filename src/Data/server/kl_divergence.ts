@@ -1,24 +1,26 @@
-import {SentenceComparisons, SentenceValues} from "../types";
+import {ComnpleteValues, SentenceComparisons, SentenceValues, VerbValues} from "../types";
 
 const KEYS = ["simple", "compound", "complex", "compound-complex"];
 
 const kl_divergence = (leftProb: number[], rightProb: number[]) => {
     let value = 0.0;
-    for(let index=0; index<leftProb.length; index++) {
-        let p = leftProb[index];
-        let q = rightProb[index];
-        if (p>0 && q>0) {
-            value += p * Math.log(p/q);
+    if (leftProb && rightProb) {
+        for(let index=0; index<leftProb.length; index++) {
+            let p = leftProb[index];
+            let q = rightProb[index];
+            if (p>0 && q>0) {
+                value += p * Math.log(p/q);
+            }
         }
     }
     return value;
 }
 
-export const calculateProbabilitiesHeatMap = (probabilities: SentenceValues) => {
+export const calculateProbabilitiesHeatMap = (probabilities: SentenceValues | VerbValues | ComnpleteValues , keys: string[] = KEYS) => {
     const matrix: number[][] = [];
-    for (let rowKey of KEYS) {
+    for (let rowKey of keys) {
         const row: number[] = [];
-        for (let colKey of KEYS) {
+        for (let colKey of keys) {
             // @ts-ignore
             row.push(kl_divergence(probabilities[rowKey], probabilities[colKey]))
         }
@@ -27,29 +29,31 @@ export const calculateProbabilitiesHeatMap = (probabilities: SentenceValues) => 
     return matrix;
 }
 
-const emptySentenceComparisonMap = () => {
-    const innerMap = Object.fromEntries( KEYS.map( key => [key, 0.0]));
-    return Object.fromEntries(KEYS.map(key => [key, structuredClone(innerMap)]));
+const emptySentenceComparisonMap = (keys: string[] = KEYS) => {
+    const innerMap = Object.fromEntries( keys.map( key => [key, 0.0]));
+    return Object.fromEntries(keys.map(key => [key, structuredClone(innerMap)]));
 }
 
-const  transformComparisonRowToMap = (values: SentenceComparisons[]) => {
-    const finalMap = emptySentenceComparisonMap();
+const transformComparisonRowToMap = (values: SentenceComparisons[], keys: string[]) => {
+    const finalMap = emptySentenceComparisonMap(keys);
 
     for (let row of values) {
-        finalMap[row.left_sentence][row.right_sentence] = row.value;
+        if (keys.includes(row.left_sentence) && keys.includes(row.right_sentence)) {
+            finalMap[row.left_sentence][row.right_sentence] = row.value;
+        }
     }
 
     return finalMap;
 
 }
 
-export const calculateComparisonHeatMap = (values: SentenceComparisons[]) => {
-    const sentenceComparisonMap = transformComparisonRowToMap(values);
+export const calculateComparisonHeatMap = (values: SentenceComparisons[], keys: string[] = KEYS) => {
+    const sentenceComparisonMap = transformComparisonRowToMap(values, keys);
 
     const matrix: number[][] = [];
-    for (let rowKey of KEYS) {
+    for (let rowKey of keys) {
         const row: number[] = [];
-        for (let colKey of KEYS) {
+        for (let colKey of keys) {
             // @ts-ignore
             row.push(sentenceComparisonMap[rowKey][colKey])
         }

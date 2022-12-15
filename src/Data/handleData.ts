@@ -1,22 +1,70 @@
-import {ScoreRow, SentenceValues, SentenceTyp} from "./types";
-import {CARDINALITIES} from "./Constants";
+import {ScoreRow, SentenceValues, SentenceTyp, ComnpleteValues, VerbValues} from "./types";
+import {CARDINALITIES, KEYS, NOMINALIZED_RELATIONS} from "./Constants";
 import {relationToCardinality} from "./cardinalities";
+import {KeySetting} from "../Container/Container";
 
-export const getProbabilities = (scoreData: ScoreRow[], cardinality: string,
-                                 numberOfPockets: number, numberOfPoints: number) => {
-    if (CARDINALITIES.includes(cardinality)) {
-        return getProbGraph(
-            scoreData.filter((row) => relationToCardinality(row.relation)===cardinality),
-            numberOfPockets, numberOfPoints);
-    }
-    return getProbGraph(scoreData, numberOfPockets, numberOfPoints);
-    
+type Probfunction = {
+    simple: (score: number) => number;
+    compound: (score: number) => number;
+    complex: (score: number) => number;
+    "compound-complex": (score: number) => number;
+    active: (score: number) => number;
+    passive: (score: number) => number;
+    nominalized: (score: number) => number;
 }
 
-const getSentenceScores = (data: ScoreRow[]) => {
-    const sentenceScores: SentenceValues = getEmptySentenceScores()
+
+function filterForCardinalities(cardinality: string, newScoreData: ScoreRow[]) {
+    if (CARDINALITIES.includes(cardinality)) {
+        newScoreData = newScoreData.filter((row) => relationToCardinality(row.relation) === cardinality);
+    }
+    return newScoreData;
+}
+
+function filterForKeySettings(keySetting: "typology" | "verbs" | "complete", newScoreData: ScoreRow[]) {
+    if (keySetting !== "typology") {
+        newScoreData = newScoreData.filter((row) => NOMINALIZED_RELATIONS.includes(row.relation));
+    }
+    return newScoreData;
+}
+
+export const getProbabilities = (scoreData: ScoreRow[], cardinality: string,
+                                 numberOfPockets: number, numberOfPoints: number,
+                                 keySetting: KeySetting) => {
+
+    const newScoreData = filterForKeySettings(keySetting, filterForCardinalities(cardinality, scoreData));
+
+    return getProbGraph(newScoreData, numberOfPockets, numberOfPoints, keySetting);
+}
+
+const getSentenceScores = (data: ScoreRow[], keySetting: KeySetting = "typology") => {
+    let sentenceScores: SentenceValues | ComnpleteValues | VerbValues = getEmptySentenceScores()
+
+    if (keySetting !== "complete") {
+        sentenceScores = {
+            ...sentenceScores,
+            active:[],
+            passive: [],
+            nominalized:  []
+        } as ComnpleteValues;
+    } else {
+        sentenceScores = {
+            active:[],
+            passive: [],
+            nominalized:  []
+        } as VerbValues;
+    }
+
+
+
+
+
     for (let row of data) {
-        sentenceScores[row.sentence as SentenceTyp].push(row.score);
+        if (Object.keys(sentenceScores).includes(row.sentence)) {
+            // @ts-ignore
+            sentenceScores[row.sentence].push(row.score);
+        }
+
     };
     return sentenceScores;
 }
@@ -24,7 +72,6 @@ const getSentenceScores = (data: ScoreRow[]) => {
 const getScoreProbabilityFunction = (numberOfPockets: number, scores: number[]) => {
     // @ts-ignore
     const pockets = [...Array(numberOfPockets).keys()].map(() => 0)
-
     for (let score of scores) {
         let pocketIndex = placeScore(numberOfPockets, score);
         pockets[pocketIndex] += 1;
@@ -64,22 +111,53 @@ const lineSpace = (start: number, end: number, numberOfPoints: number) => {
     return points;
 }
 
-export const getProbGraph = (scoreData: ScoreRow[], numberOfPockets: number, numberOfPoints: number) => {
-    const sentenceScores = getSentenceScores(scoreData);
-    const probFunctions = {
+export const getProbGraph = (scoreData: ScoreRow[],
+                             numberOfPockets: number,
+                             numberOfPoints: number,
+                             keySetting: KeySetting) => {
+
+    let sentenceScores = getSentenceScores(scoreData) as ComnpleteValues;
+
+    // @ts-ignore
+    let probFunctions = {
         simple: getScoreProbabilityFunction(numberOfPockets, sentenceScores.simple),
         compound: getScoreProbabilityFunction(numberOfPockets, sentenceScores.compound),
         complex: getScoreProbabilityFunction(numberOfPockets, sentenceScores.complex),
-        "compound-complex": getScoreProbabilityFunction(numberOfPockets, sentenceScores["compound-complex"])
+        "compound-complex": getScoreProbabilityFunction(numberOfPockets, sentenceScores["compound-complex"]),
     };
 
     const scores = lineSpace(0, 1, numberOfPoints);
-    const probabilities = {
+
+    let probabilities = {
         simple: scores.map((score) => probFunctions.simple(score)),
         compound: scores.map((score) => probFunctions.compound(score)),
         complex: scores.map((score) => probFunctions.complex(score)),
         "compound-complex": scores.map((score) => probFunctions["compound-complex"](score))
+    } as ComnpleteValues;
+
+    if (keySetting !== "typology") {
+
+        probFunctions = {
+            ...probFunctions,
+            active: getScoreProbabilityFunction(numberOfPockets, sentenceScores.active),
+            passive: getScoreProbabilityFunction(numberOfPockets, sentenceScores.passive),
+            nominalized: getScoreProbabilityFunction(numberOfPockets, sentenceScores.nominalized),
+        } as Probfunction;
+
+        probabilities = {
+            ...probabilities,
+            // @ts-ignore
+            active: scores.map((score) => probFunctions.active(score)),
+            // @ts-ignore
+            passive: scores.map((score) => probFunctions.passive(score)),
+            // @ts-ignore
+            nominalized: scores.map((score) => probFunctions.nominalized(score)),
+        } as ComnpleteValues;
     }
+
+    // @ts-ignore
+    //const probabilities = keys.map(key => scores.map((score) => probFunctions[key](score)));
+
 
     return {
         scores,

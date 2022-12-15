@@ -5,35 +5,30 @@ import {MetricComparison} from "./MetricComparison/MetricComparison";
 import {RelationComparison} from "./RelationComparison/RelationComparison";
 import {ScoreComparison} from "./ScoreComparison/ScoreComparison";
 import {FeatureComparison} from "./FeatureComparison/FeatureComparison";
-import {CARDINALITIES, KEYS, NO_FILTER_NAME} from "../Data/Constants";
-import {FilterSelection} from "./Components/FilterSelection";
+import {KEYS} from "../Data/Constants";
 import {SelectChangeEvent} from "@mui/material";
-import {MetricType} from "../Data/types";
 import {KeySettings} from "./KeySettings";
 
 
-type KeySetting = "typology" | "verbs" | "complete";
+export type KeySetting = "typology" | "verbs" | "complete";
 
+const Container = () => {
 
-
-
-export const Container = () => {
-
-    const [keySettings, setKeySetting] = useState<KeySetting>("typology");
+    const [keySetting, setKeySetting] = useState<KeySetting>("typology");
     const [keys, setKeys] = useState<string[]>(KEYS.typology);
 
     const handleKeySettingChange = (event: SelectChangeEvent) => {
         setKeySetting(event.target.value as KeySetting);
     };
 
-    useEffect(() => {setKeys(KEYS[keySettings])}, [keySettings]);
+    useEffect(() => {setKeys(KEYS[keySetting])}, [keySetting]);
 
 
     return (
         <>
             <h1>Language Model Dashboard</h1>
             <h3>Analysis of Syntax Structure’s Impact on Fact Retrieval from Pre-trained Language Models</h3>
-            <KeySettings onChange={handleKeySettingChange} value={keySettings}/>
+            <KeySettings onChange={handleKeySettingChange} value={keySetting}/>
             <div className="container">
                 <div className="row">
                     <div className="column">
@@ -48,10 +43,12 @@ export const Container = () => {
                         <RelationComparison keys={keys}/>
                     </div>
                     <div className="column">
-                        <ScoreComparison/>
-                        <FeatureComparison/>
+                        <ScoreComparison keys={keys} keySetting={keySetting}/>
+                        <FeatureComparison keys={keys}/>
                     </div>
                 </div>
             </div>
         </>)
 }
+
+export {Container};

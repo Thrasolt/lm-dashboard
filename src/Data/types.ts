@@ -66,7 +66,23 @@ export type SentenceValues = {
     simple: number[],
     compound: number[],
     complex: number[],
-    "compound-complex": number[]
+    "compound-complex": number[],
+}
+
+export type VerbValues = {
+    active: number[],
+    passive: number[],
+    nominalized: number[],
+}
+
+export type ComnpleteValues = {
+    simple: number[],
+    compound: number[],
+    complex: number[],
+    "compound-complex": number[],
+    active: number[],
+    passive: number[],
+    nominalized: number[],
 }
 
 export type SentenceComparisons = {
