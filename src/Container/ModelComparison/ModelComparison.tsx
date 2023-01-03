@@ -9,6 +9,7 @@ import {FilterSelection} from "../Components/FilterSelection";
 import {ModelComparisonColumns} from "./ModelComparisonColumns";
 import {CARDINALITIES, DATA_SOURCE_CHOICES, METRIC_CHOICES, NO_FILTER_NAME} from "../../Data/Constants";
 import {getAggregateData} from "../../Data/server/retriveAggregateData";
+import {LatexButton} from "../Components/LatexButton";
 
 type Props = {
     keys: string[]
@@ -47,6 +48,8 @@ export const ModelComparison: React.FC<Props> = ({keys}: Props) => {
     }, [filterName, dataSource, metric, keys])
 
 
+    // @ts-ignore
+    // @ts-ignore
     return (<>
             <h2>Model Comparison</h2>
             <div className="filterContainer">
@@ -76,6 +79,14 @@ export const ModelComparison: React.FC<Props> = ({keys}: Props) => {
                 columns={ModelComparisonColumns.filter(
                     element => keys.includes(element.name as string) || element.name === "Model")}
                 data={data}
+            />
+            <LatexButton
+                tableCaption={"Model Comparison"}
+                data={data as Object[]}
+                tableLable={"ModelComparison"}
+                //@ts-ignore
+                configValues={[filterName, dataSource, metric].filter(val => val !== null)}
+                keys={keys}
             />
         </>
     );

@@ -14,6 +14,7 @@ import DataTable from "react-data-table-component";
 import {getMetricComparisonData, getModelComparisonData} from "../../Data/handleAggregateData";
 import {MetricComparisonColumns} from "./MetricComparisonColumns";
 import {getAggregateData} from "../../Data/server/retriveAggregateData";
+import {LatexButton} from "../Components/LatexButton";
 
 type Props = {
     keys: string[]
@@ -79,6 +80,14 @@ export const MetricComparison: React.FC<Props> = ({keys}: Props) => {
             columns={MetricComparisonColumns.filter(
                 element => keys.includes(element.name as string) || element.name === "metric")}
             data={data}
+        />
+        <LatexButton
+            tableCaption={"Metric Comparison"}
+            data={data as Object[]}
+            tableLable={"Metric Comparison"}
+            //@ts-ignore
+            configValues={[model, dataSource, filterName].filter(val => val !== null)}
+            keys={keys}
         />
     </>)
 }

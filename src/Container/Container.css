@@ -17,3 +17,7 @@ h1 {
 h3 {
     text-align:center;
 }
+
+img {
+    max-height: 1em;
+}

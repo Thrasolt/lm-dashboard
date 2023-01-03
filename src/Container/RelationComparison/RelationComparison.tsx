@@ -14,6 +14,7 @@ import {FilterSelection} from "../Components/FilterSelection";
 import {DATA_SOURCE_CHOICES, METRIC_CHOICES, MODELS} from "../../Data/Constants";
 import {SelectChangeEvent} from "@mui/material";
 import {getAggregateData} from "../../Data/server/retriveAggregateData";
+import {LatexButton} from "../Components/LatexButton";
 
 
 type Props = {
@@ -79,6 +80,14 @@ export const RelationComparison: React.FC<Props> = ({keys}: Props) => {
             columns={RelationComparisonColumns.filter(
                 element => keys.includes(element.name as string) || element.name === "relation")}
             data={data}
+        />
+        <LatexButton
+            tableCaption={"Relation Comparison"}
+            data={data as Object[]}
+            tableLable={"Relation Comparison"}
+            //@ts-ignore
+            configValues={[model, dataSource, metric].filter(val => val !== null)}
+            keys={keys}
         />
 
     </>)
